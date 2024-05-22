@@ -20,8 +20,8 @@ struct draye // for every single cell of gameboard
 	bool is_do;	  // for check to add the draye only ones
 	bool is_fool; // to check the existence of a number is draye
 };
-draye **undo; // undo
-struct Player // saving players and cout them in leather board
+
+struct Player // saving players and cout them in leader board
 {
 	string name;
 	int score;
@@ -109,7 +109,7 @@ draye **move(draye **game_board, int size, bool &is_change) // in this function 
 	case 'd': // for click right
 		for (int i = 0; i < size; i++)
 		{
-			for (int j = size - 1; j >= 0; j--)
+			for (int j = size - 2; j >= 0; j--)
 			{
 				if (game_board[i][j].is_fool == true) // movement in down direction
 				{
@@ -118,7 +118,7 @@ draye **move(draye **game_board, int size, bool &is_change) // in this function 
 						swap(game_board[i][j + 1].amount, game_board[i][j].amount);
 						swap(game_board[i][j + 1].is_fool, game_board[i][j].is_fool);
 						i = 0;
-						j = size;
+						j = size-1;
 						is_change = true;
 					}
 				}
@@ -128,14 +128,51 @@ draye **move(draye **game_board, int size, bool &is_change) // in this function 
 					{
 						if (!game_board[i][j].is_do and !game_board[i][j + 1].is_do)
 						{
-							is_change = true;
 							game_board[i][j].is_fool = false;
-							game_board[i][j + 1].is_do = true;
-							score += game_board[i][j + 1].amount * 2;
 							game_board[i][j].amount = 0;
+							game_board[i][j + 1].is_do = true;
 							game_board[i][j + 1].amount *= 2;
+							score += game_board[i][j + 1].amount * 2;
 							i = 0;
-							j = -1;
+							j = size-1;
+							is_change = true;							
+						}
+					}
+				}
+			}
+		}
+		break;
+
+	case 'a': // for click left
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 1; j < size; j++)
+			{
+				if (game_board[i][j].is_fool == true) // to movement left in tanle
+				{
+					if (game_board[i][j - 1].is_fool == false)
+					{
+						swap(game_board[i][j - 1].amount, game_board[i][j].amount);
+						swap(game_board[i][j - 1].is_fool, game_board[i][j].is_fool);
+						i = 0;
+						j = 0;
+						is_change = true;
+					}
+				}
+				if (game_board[i][j - 1].amount == game_board[i][j].amount) // add tow number in left direction
+				{
+					if (game_board[i][j].is_fool == true and game_board[i][j - 1].is_fool == true)
+					{
+						if (!game_board[i][j].is_do and !game_board[i][j - 1].is_do)
+						{
+							game_board[i][j].amount = 0;
+							game_board[i][j].is_fool = false;
+							score += game_board[i][j - 1].amount * 2;
+							game_board[i][j - 1].amount *= 2;
+							game_board[i][j - 1].is_do = true;
+							i = 0;
+							j = 0;
+							is_change = true;
 						}
 					}
 				}
@@ -173,43 +210,6 @@ draye **move(draye **game_board, int size, bool &is_change) // in this function 
 							game_board[i - 1][j].is_do = true;
 							i = 1;
 							j = -1;
-							is_change = true;
-						}
-					}
-				}
-			}
-		}
-		break;
-
-	case 'a': // for click left
-		for (int i = 0; i < size; i++)
-		{
-			for (int j = 1; j < size; j++)
-			{
-				if (game_board[i][j].is_fool == true) // to movement left in tanle
-				{
-					if (game_board[i][j - 1].is_fool == false)
-					{
-						swap(game_board[i][j - 1].amount, game_board[i][j].amount);
-						swap(game_board[i][j - 1].is_fool, game_board[i][j].is_fool);
-						i = 0;
-						j = 0;
-						is_change = true;
-					}
-				}
-				if (game_board[i][j - 1].amount == game_board[i][j].amount) // add tow number in left direction
-				{
-					if (game_board[i][j].is_fool == true and game_board[i][j - 1].is_fool == true)
-					{
-						if (!game_board[i][j].is_do and !game_board[i][j - 1].is_do)
-						{
-							game_board[i][j].amount = 0;
-							game_board[i][j].is_fool = false;
-							score += game_board[i][j - 1].amount * 2;
-							game_board[i][j - 1].amount *= 2;
-							game_board[i][j - 1].is_do = true;
-							i = 0;
-							j = 0;
 							is_change = true;
 						}
 					}
@@ -256,11 +256,10 @@ draye **move(draye **game_board, int size, bool &is_change) // in this function 
 		break;
 	case 'u':
 	{
-		return undo;
 		break;
 	}
 	case 'e':
-	exit_in_game = true ;
+		exit_in_game = true;
 	}
 	return game_board;
 }
@@ -480,9 +479,9 @@ draye **Random_deraye(draye **game_board, int size, bool is_change) // for getti
 	return game_board;
 }
 
-void save_leaderboard(string name)
+void save_leaderboard(string name) // saving score and name of players in file 
 {
-	ofstream outputFile("Leathboard.txt", ios::app); // write informations of players in file
+	ofstream outputFile("Leaderboard.txt", ios::app); // write informations of players in file
 	if (outputFile.is_open())
 	{
 
@@ -495,10 +494,10 @@ void save_leaderboard(string name)
 	}
 }
 
-void Leader_board()
+void Leader_board() // show the sorted saved information 
 {
 	Player *players = new Player[100];
-	ifstream file("Leathboard.txt");
+	ifstream file("Leaderboard.txt");
 	if (file.is_open())
 	{
 		string line;
@@ -518,7 +517,7 @@ void Leader_board()
 				 << "(" << i + 1 << ")" << setw(15) << players[i].name << setw(10) << players[i].score << endl;
 		}
 		count = 0;
-		int end = getch();
+		getch();
 		system("cls");
 		file.close();
 	}
@@ -576,7 +575,6 @@ void New_Game() // for creating a new game
 			Sleep(3000);
 			save_leaderboard(name);
 			score = 0;
-			char end_game = getch();
 			system("cls");
 			return;
 		}
@@ -584,7 +582,6 @@ void New_Game() // for creating a new game
 		{
 			cout << "winnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" << endl;
 			Sleep(3000);
-			char end_game = getch();
 			score = 0;
 			save_leaderboard(name);
 			system("cls");
@@ -605,7 +602,7 @@ void New_Game() // for creating a new game
 	delete game_board;
 }
 
-void menu()
+void menu() // MENU
 {
 	Sleep(500);
 	cout << "                                                   if you want to go and PLAY our beautifull game press 1" << endl
